@@ -18,7 +18,7 @@ int chaserColor=#00C000;
 
 int ptsW, ptsH;
 
-PImage img;
+PImage kerbinMap, starField;
 
 int numPointsW;
 int numPointsH_2pi; 
@@ -31,7 +31,16 @@ float[] multXZ;
 
 void setup() {
   size(1920,1080,P3D); //<>//
-  img=loadImage("KerbinMap.jpg");
+  //Map of Kerbin from http://forum.kerbalspaceprogram.com/index.php?/topic/157368-map-of-kerbin/
+  //Exact URL is http://i.imgur.com/GXLlgpl.jpg
+  kerbinMap=loadImage("KerbinMap.jpg"); 
+  //Starfield from http://smattila.deviantart.com/art/Starfield-stock-154786926
+  //with the following post-processing:
+  //* Crop to lower-left corner
+  //* Flip vertical
+  //* Change mode to 256-color paletized
+  //* Run through optipng
+  starField=loadImage("starfield-small.png");
   ortho();
   ptsW=60;
   ptsH=60;
@@ -53,41 +62,57 @@ void dart(float r) {
 }
 
 void draw() {
-  background(0x000000);
+  //Timing and angles
   float t=frameCount/FrameRate; //This is the actual time since start
   t=t*TimeRate; //Now it is scaled time
   float KerbinTheta=t*KerbinW;
   float targetTheta=t*targetW;
   float chaserTheta=t*chaserW;
+
+  //Backdrop
+  //background(0x000000);         //Erase with the blackness of Space, since we are working in space
+  image(starField,0,0);           //Erase with the starfield image
+  
+  //Put the origin at the center
+  translate(width/2,height/2);    //Don't need to push or pop, since matrix stack is cleared and restored to identity, so we don't need to push before this
+  
+  //Draw the planet
   pushMatrix();
-  translate(width/2,height/2);
-  pushMatrix();
-  rotateZ(-(float)KerbinTheta);
-  rotateX(-PI/2);
-  //image(img,-width/2,-height/2);
-  noStroke();
-  textureSphere(KerbinRe*pixScale,KerbinRe*pixScale,KerbinRe*pixScale,img);
+    rotateZ(-(float)KerbinTheta);
+    rotateX(-PI/2);
+    noStroke();
+    textureSphere(KerbinRe*pixScale,KerbinRe*pixScale,KerbinRe*pixScale,kerbinMap);
   popMatrix();
+  
+  //Draw the target orbit
   noFill();
   stroke(targetColor*3/4);
   strokeWeight(5);
   arc(0,0,targetR*pixScale*2,targetR*pixScale*2,-targetTheta,0);
+  //Draw the target dart
   noStroke();
   fill(targetColor);
   pushMatrix();
-  rotateZ(-targetTheta);
-  dart(targetR);
+    rotateZ(-targetTheta);
+    dart(targetR);
   popMatrix();
+  
+  //Draw the chaser orbit
   noFill();
   stroke(chaserColor*3/4);
   arc(0,0,chaserR*pixScale*2,chaserR*pixScale*2,-chaserTheta,0);
+  //Draw the chaser dart
   noStroke();
   fill(chaserColor);
   pushMatrix();
-  rotateZ(-chaserTheta);
-  dart(chaserR);
+    rotateZ(-chaserTheta);
+    dart(chaserR);
   popMatrix();
-  popMatrix();
+  
+  //Save the frame
+  saveFrame("Rendezvous-001-####.tga");
+  //Punch out after drawing a lap of the target
+  if(targetTheta>2*PI) exit();
 }
 
 void initializeSphere(int numPtsW, int numPtsH_2pi) {

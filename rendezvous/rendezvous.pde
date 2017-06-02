@@ -110,7 +110,7 @@ void draw() {
   popMatrix();
   
   //Save the frame
-  saveFrame("Rendezvous-001-####.tga");
+//  saveFrame("Rendezvous-001-####.tga");
   //Punch out after drawing a lap of the target
   if(targetTheta>2*PI) exit();
 }

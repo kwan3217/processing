@@ -1,7 +1,7 @@
 import subprocess
 import os
 import re
-
+#
 position=re.compile(r"!--Position: ([A-Za-z0-9_]+) \(([0-9]+),([0-9]+)\)")
 bbox_height=re.compile(r"<svg.*height='([0-9]+(.[0-9]+)?)pt'")
 bbox_width =re.compile( r"<svg.*width='([0-9]+(.[0-9]+)?)pt'")

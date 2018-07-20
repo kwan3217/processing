@@ -2,238 +2,6 @@ int background=#c0c0c0;
                    
 float desiredFrameRate=24;
 
-float linterp(float x0, float y0, float x1, float y1, float x) {
-  float t=(x-x0)/(x1-x0);
-  float result=y0*(1-t)+y1*t;
-  return result;
-}
-
-class Point {
-  public float x;
-  public float y;
-  public Text label;
-  int h,v;
-  Point(float Lx, float Ly) {
-    x=Lx;
-    y=Ly;
-    label=null;
-  }
-  Point(Point P0, Point P1, float t) {
-    this(linterp(0,P0.x,1,P1.x,t),linterp(0,P0.y,1,P1.y,t));
-  }
-  Point(Point P) {
-    x=P.x;
-    y=P.y;
-    label=P.label;
-    h=P.h;
-    v=P.v;
-  }
-  void draw(float t0, float t1, float t2, float t3, float t) {
-    if(label!=null) {
-      label.draw(t0,t1,t2,t3,t);
-    }
-  }
-  void draw(float t0, float t1, float t) {
-    //Just fade in, not out
-    draw(t0,t1,9999999,9999999,t);
-  }
-}
-
-class Text{
-  public float x;
-  public float y;
-  public float w;
-  public float h;
-  public int horz, vert;
-  public int kolor;
-  public String name;
-  public boolean ofs;
-  Text(float Lx, float Ly, float Lw, float Lh, int Lkolor, String Lname, int Lhorz, int Lvert, boolean Lofs) {
-    x=Lx;
-    y=Ly;
-    w=Lw;
-    h=Lh;
-    kolor=Lkolor;
-    name=Lname;
-    horz=Lhorz;
-    vert=Lvert;
-    ofs=Lofs;
-  }
-  Text(float Lx, float Ly, int Lkolor, String Lname, int Lhorz, int Lvert, boolean Lofs) {
-    this(Lx,Ly,-1,-1,Lkolor,Lname,Lhorz,Lvert,Lofs);
-  }
-  Text(float Lx, float Ly, float Lw, int Lkolor, String Lname, int Lhorz, int Lvert, boolean Lofs) {
-    this(Lx,Ly,Lw,99999,Lkolor,Lname,Lhorz,Lvert,Lofs);
-  }
-  Text(Point P, int Lkolor, String Lname, int Lhorz, int Lvert, boolean Lofs) {
-    //Text object as a Point label. Doesn't need bounding box constraint
-    this(P.x,P.y,-1,-1,Lkolor,Lname,Lhorz,Lvert,Lofs);
-  }
-  void draw(float t0, float t1, float t2, float t3, float t) {
-    textSize(50);
-    textAlign(horz,vert);
-    if(t<t0) {
-      return;
-    } else if(t<t1) {
-      fill(kolor,linterp(t0,0,t1,255,t));
-    } else if(t<t2) {
-      fill(kolor);
-    } else if(t<t3) {
-      fill(kolor,linterp(t2,255,t3,0,t));
-    } else {
-      return;
-    }
-    float xx=x;
-    if(ofs) {
-      if(horz==LEFT) {
-        xx+=20;
-      } else if(horz==RIGHT) {
-        xx-=20;
-      }
-    }
-    if(horz==CENTER) {
-      rectMode(CENTER);
-      if(w>0 && h>0) {
-        text(name,xx,y,w,h);
-      } else {
-        text(name,xx,y);
-      }
-    } else {
-      if(w>0 && h>0) {
-        rectMode(CORNER);
-        text(name,xx,y,w,h);
-      } else {
-        text(name,xx,y);
-      }
-    }
-  }
-  void draw(float t0, float t1, float t) {
-    //Just fade in, not out
-    draw(t0,t1,9999999,9999999,t);
-  }
-}
-
-class Segment {
-  Point P0,P1;
-  int kolor;
-  Segment(Point LP0, Point LP1, int Lkolor) {
-    P0=LP0;
-    P1=LP1;
-    kolor=Lkolor;
-  }
-  void draw(float t0, float t1, float t2, float t3, float t) {
-    //Line will draw from P0 at time t0 to P1 at time t1, will start fading out at t2, and will be completely faded out at t3
-    if(t<t0) {
-      return; //Not time to draw yet
-    } else if(t<t1) {
-      float x=linterp(t0,P0.x,t1,P1.x,t);
-      float y=linterp(t0,P0.y,t1,P1.y,t);
-      stroke(kolor);
-      strokeWeight(5);
-      line(P0.x,P0.y,x,y);
-    } else if(t<t2) {
-      stroke(kolor);
-      strokeWeight(5);
-      line(P0.x,P0.y,P1.x,P1.y);
-    } else if(t<t3) {
-      float alpha=linterp(t2,255,t3,0,t);
-      strokeWeight(5);
-      stroke(kolor,alpha);
-      line(P0.x,P0.y,P1.x,P1.y);
-    } else {
-      return; //Line has already faded away
-    }
-  }
-  void draw(float t0, float t1, float t) {
-    //Just fade in, not out
-    draw(t0,t1,9999999,9999999,t);
-  }
-}
-
-class Line extends Segment {
-  Line(Point LP0, Point LP1, int Lkolor) {
-    super(LP0,LP1,Lkolor);
-  }
-  void draw(float t0, float t1, float t2, float t3, float t) {
-    //Line will fade in from P0 at time t0 to P1 at time t1, will start fading out at t2, and will be completely faded out at t3
-    if(t<t0) {
-      return; //Not time to draw yet
-    } else if(t<t1) {
-      float alpha=linterp(t0,0,t1,255,t);
-      stroke(kolor,alpha);
-    } else if(t<t2) {
-      stroke(kolor);
-    } else if(t<t3) {
-      float alpha=linterp(t2,255,t3,0,t);
-      stroke(kolor,alpha);
-    } else {
-      return; //Line has already faded away
-    }
-    strokeWeight(3);
-    float x0=linterp(0,P0.x,1,P1.x,-9);
-    float y0=linterp(0,P0.y,1,P1.y,-9);
-    float x1=linterp(0,P0.x,1,P1.x, 9);
-    float y1=linterp(0,P0.y,1,P1.y, 9);
-    line(x0,y0,x1,y1);
-  }
-}
-
-class Angle {
-  Point P1,O,P2; //O is the vertext (following Hilbert) and P1 and P2 are two points on the legs
-  int kolor;
-  float f1,f2;
-  Angle(Point LP1, Point LO, Point LP2,int Lkolor) {
-    P1=LP1;
-    O=LO;
-    P2=LP2;
-    kolor=Lkolor;
-    f1=0.1;
-    f2=0.2;
-  }
-  void draw(float dx, float dy, float t0, float t1, float t2, float t3, float t) {
-    float alpha_scale;
-    if(t<t0) {
-      return;
-    } else if(t<t1) {
-      alpha_scale=linterp(t0,0,t1,1,t);
-    } else if(t<t2) {
-      alpha_scale=1;
-    } else if(t<t3) {
-      alpha_scale=linterp(t2,1,t3,0,t);
-    } else {
-      return;
-    }
-    Point Pa=new Point(O,P1,f1);
-    Point Pb=new Point(O,P2,f1);
-    stroke(kolor,alpha_scale*255);
-    noFill();
-    strokeJoin(ROUND);
-    strokeCap(SQUARE);
-    beginShape();
-    vertex(Pa.x+dx,Pa.y+dy);
-    vertex(O.x+dx,O.y+dy);
-    vertex(Pb.x+dx,Pb.y+dy);
-    endShape();
-    for(int i=0;i<256;i++) {
-      stroke(kolor,linterp(0,255,256,0,i)*alpha_scale);
-      Pa=new Point(O,P1,linterp(0,f1,256,f2,i  ));
-      Pb=new Point(O,P1,linterp(0,f1,256,f2,i+1));
-      line(Pa.x+dx,Pa.y+dy,Pb.x+dx,Pb.y+dy);
-      Pa=new Point(O,P2,linterp(0,f1,256,f2,i  ));
-      Pb=new Point(O,P2,linterp(0,f1,256,f2,i+1));
-      line(Pa.x+dx,Pa.y+dy,Pb.x+dx,Pb.y+dy);
-    }  
-    strokeCap(ROUND);
-  }
-  void draw(float t0, float t1, float t2, float t3, float t) {
-    draw(0,0,t0,t1,t2,t3,t);
-  }
-  void draw(float t0, float t1, float t) {
-    //Just fade in, not out
-    draw(t0,t1,9999999,9999999,t);
-  }
-}
-
 Point A,B,C,F,G;
 Point AL,BL,CL,FL,GL;
 Point AR,BR,CR,FR,GR;
@@ -252,10 +20,11 @@ Angle BCF,CBG,BCFL,CBGR;
 Angle ACBR,BCFR;
 Line lAB,lAC;
 Text[] PointLabel=new Text[5];
-Text[] step=new Text[16];
+Text[] step=new Text[20];
 
 void setup() {
-  size(1920,1080,P2D);
+  //size(1920,1080,P2D);
+  fullScreen(P2D);
   frameRate(desiredFrameRate);
   A=new Point(width*0.7,height*0.2);PointLabel[0]=new Text(A,#ff0000,"A",LEFT,BASELINE, true);A.label=PointLabel[0];
   B=new Point(width*0.6,height*0.6);PointLabel[1]=new Text(B,#FF8000,"B",RIGHT,BASELINE, true);B.label=PointLabel[1];  
@@ -340,19 +109,23 @@ void setup() {
   step[13]=new Text(width*0.7,100,width*0.9,#000000,"On each side, you start with equal angles, and subtract equal angles.",CENTER,CENTER,false);
   step[14]=new Text(width*0.7,100,width*0.9,#000000,"Therefore the parts that are left must be equal.",CENTER,CENTER,false);
   step[15]=new Text(width*0.7,150,width*0.9,#ff0000,"Therefore there are two equal angles in an isocoles triangle.",CENTER,CENTER,false);
+  step[16]=new Text(100,100,700,#000000,"This proof has come to be known as the 'Pons Asinorum', the bridge of donkeys. It is said to separate the men from the boys, the serious from the dalliers.",LEFT,BASELINE,false);
+  step[17]=new Text(100,600,800,#000000,"Nowadays we would call it a 'weedout' course",LEFT,BASELINE,false);
+  step[18]=new Text(100,300,800,#000000,"If it seems unnecessarily complicated, that's because it is.",LEFT,BASELINE,false);
+  step[19]=new Text(100,600,800,#000000,"Let's try it a different way.",LEFT,BASELINE,false);
 }
 
 void draw() {
   background(#c0e0ff);
-  float t=frameCount/desiredFrameRate;
-  if(t>115) {
+  float t=frameCount/desiredFrameRate+100;
+  if(t>130) {
     print(float(millis())/1000);
     exit();
   }
   float MoveT0=45;
   float MoveT1=48;
-  float MoveT2=9999;
-  float MoveT3=9999;
+  float MoveT2=108;
+  float MoveT3=111;
   //Move to the center at the appropriate time
   if(t<MoveT0) {
   } else if(t<MoveT1) {
@@ -470,8 +243,8 @@ void draw() {
     FR.x=F.x+width*0.15;
     GR.x=G.x+width*0.15;
   }
-  MoveTri1T0=105;
-  MoveTri1T1=110;
+  MoveTri1T0=102;
+  MoveTri1T1=105;
   
   if(t<MoveTri1T0) {
   } else if(t<MoveTri1T1) {
@@ -514,19 +287,20 @@ void draw() {
   CA.draw(2,3,t);
   step[0].draw(0,0.5,9.5,10.0,t);
   //Draw segment BD
-  BF.draw(11,12,t);
-  F.draw(11,11.5,t);
+  float fadetime=120;
+  BF.draw(11,12,fadetime,fadetime+1,t);fadetime+=0.5;
+  F.draw(11,11.5,fadetime,fadetime+1,t);fadetime+=0.5;
   step[1].draw(10,10.5,14.5,15,t);
   //Draw segment CE
-  CG.draw(16,17,t);
-  G.draw(16,16.5,t);
+  CG.draw(16,17,fadetime,fadetime+1,t);fadetime+=0.5;
+  G.draw(16,16.5,fadetime,fadetime+1,t);fadetime+=0.5;
   step[2].draw(15,15.5,19.5,20,t);
   //Draw two new triangles
-  CF.draw(20,21,t);
+  CF.draw(20,21,fadetime,fadetime+1,t);fadetime+=0.5;
   CFLflash.draw(21,21,22,23,t);
   AFLflash.draw(21,21,22,23,t);
   ACLflash.draw(21,21,22,23,t);
-  BG.draw(23,24,t);
+  BG.draw(23,24,fadetime,fadetime+1,t);fadetime+=0.5;
   BGRflash.draw(24,24,25,26,t);
   AGRflash.draw(24,24,25,26,t);
   ABRflash.draw(24,24,25,26,t);
@@ -577,10 +351,10 @@ void draw() {
   AFCL.draw(62,62,63,64,t);
   ABGR.draw(64,64,65,66,t);
   ACFL.draw(64,64,65,66,t);
-  AGB.draw(62,62,t);
-  AFC.draw(62,62,t);
-  ABG.draw(64,64,t);
-  ACF.draw(64,64,t);
+  AGB.draw(62,62,fadetime,fadetime+1,t);fadetime+=0.5;
+  AFC.draw(62,62,fadetime,fadetime+1,t);fadetime+=0.5;
+  ABG.draw(64,64,fadetime,fadetime+1,t);fadetime+=0.5;
+  ACF.draw(64,64,fadetime,fadetime+1,t);fadetime+=0.5;
   //Show off the small triangles
   step[8].draw(70,70.5,74.5,75,t);
   BFL.draw(70,70,84,85,t);
@@ -595,31 +369,37 @@ void draw() {
   step[10].draw(80,80.5,84.5,85,t);
   BCFL.draw(81,81,82,83,t);
   CBGR.draw(81,81,82,83,t);
-  BCF.draw(81,81,t);
-  CBG.draw(81,81,t);
+  BCF.draw(81,81,fadetime,fadetime+1,t);fadetime+=0.5;
+  CBG.draw(81,81,fadetime,fadetime+1,t);fadetime+=1.5;
   //Show the three angles on the left
   step[11].draw(85,85.5,94.5,95,t);
-  ABCL.draw(0,0,85,86,99999,99999,t);
+  ABCL.draw(0,0,85,86,fadetime,fadetime+1,t);fadetime+=0.5;
   CBGL.draw(0,5,86,87,96,97,t);
   ABGL.draw(-10,7.5,87,88,97,98,t);
   step[12].draw(90,90.5,94.5,95,t);
-  ACBR.draw(0,0,90,91,99999,99999,t);
+  ACBR.draw(0,0,90,91,fadetime,fadetime+1,t);fadetime+=0.5;
   BCFR.draw(0,5,91,92,96,97,t);
   ACFR.draw(10,7.5,92,93,97,98,t);
   //Subtract the two known equal angles
   step[13].draw(95,95.5,99.5,100,t);
 
   //Show the remaining angles to be congruent
-  if(t>100 && t<105) {
-    ABCL.kolor=color(linterp(100,0,105,255,t));
-    ACBR.kolor=color(linterp(100,0,105,255,t));
-  } else if(t>105) {
+  if(t>100 && t<102) {
+    ABCL.kolor=color(linterp(100,0,102,255,t));
+    ACBR.kolor=color(linterp(100,0,102,255,t));
+  } else if(t>102) {
     ABCL.kolor=color(#ffffff);
     ACBR.kolor=color(#ffffff);
   }
   step[14].draw(100,100.5,109.5,110,t);
   step[15].draw(103,103.5,109.5,110,t);
-//  saveFrame("PonsAsinorium-#####.png");
+  //Talk about why it is called what it is called.
+  step[16].draw(110,110.5,119.5,120,t);
+  step[17].draw(115,115.5,119.5,120,t);
+  step[18].draw(120,120.5,129.5,130,t);
+  step[19].draw(125,125.5,129.5,130,t);
+  
+  //saveFrame("PonsAsinorium-#####.png");
 }
                  
                  

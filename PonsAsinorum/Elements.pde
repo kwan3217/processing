@@ -229,3 +229,8 @@ class Angle {
     draw(t0,t1,9999999,9999999,t);
   }
 }
+
+interface Scene {
+  void draw(float t);   
+  float sceneTime();
+}

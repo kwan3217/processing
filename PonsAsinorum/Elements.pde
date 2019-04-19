@@ -28,44 +28,69 @@ class TimeTrap {
       return 0;
     }
   }
+  boolean up(float t){
+    return t<t2;
+  }
 }
 
 abstract class Element {
   protected int kolor;
-  protected abstract void draw(float dx, float dy, float t0, float t1, float t2, float t3, float t, int baseColor, float xofs, float yofs); 
-  void draw(float dx, float dy, float t0, float t1, float t2, float t3, float t) {
-    draw(dx,dy,t0,t1,t2,t3,t,kolor,0,0);
+  protected ArrayList<TimeTrap> fadeList;
+  float fade(float t) {
+    float result=0;
+    for(TimeTrap fadeTrap:fadeList) {
+      result+=fadeTrap.eval(t);
+    }
+    return result;
   }
-  void draw(float t0, float t1, float t2, float t3, float t) {
-    draw(0,0,t0,t1,t2,t3,t,kolor,0,0);
+  boolean up(float t) {
+    boolean result=false;
+    for(TimeTrap fadeTrap:fadeList) {
+      result|=fadeTrap.up(t);
+    }
+    return result;
   }
-  void drawShadow(float dx, float dy, float t0, float t1, float t2, float t3, float t) {
-    draw(dx,dy,t0,t1,t2,t3,t,shadowColor,xshadow,yshadow);
+  Element(int Lkolor, ArrayList<TimeTrap> LfadeList) {
+    kolor=Lkolor;
+    fadeList=LfadeList;
   }
-  void drawShadow(float t0, float t1, float t2, float t3, float t) {
-    draw(0,0,t0,t1,t2,t3,t,shadowColor,xshadow,yshadow);
+  Element(int Lkolor) {
+    this(Lkolor,new ArrayList<TimeTrap>());
   }
-  void draw(float t0, float t1, float t) {
-    //Just fade in, not out
-    draw(0,0,t0,t1,9999999,9999999,t);
+  Element() {
+    this(#000000);
   }
-  void drawShadow(float t0, float t1, float t) {
-    //Just fade in, not out
-    drawShadow(0,0,t0,t1,9999999,9999999,t);
+  void addFade(TimeTrap T) {
+    fadeList.add(T);
   }
-  void draw(float t0, float t1, float t2, float t3, float t, boolean doMain) {
+  void addFade(float t0, float t1, float t2, float t3) {
+    fadeList.add(new TimeTrap(t0,t1,t2,t3));
+  }
+  void addFade(float t0, float t1) {
+    fadeList.add(new TimeTrap(t0,t1));
+  }
+  protected abstract void draw(float dx, float dy, float Lfade, boolean up, int baseColor, float xofs, float yofs); 
+  void draw(float dx, float dy, float t) {
+    draw(dx,dy,fade(t),up(t),kolor,0,0);
+  }
+  void draw(float t) {
+    draw(0,0,fade(t));
+  }
+  void drawShadow(float dx, float dy, float t) {
+    draw(dx,dy,fade(t),up(t),shadowColor,xshadow,yshadow);
+  }
+  void drawShadow(float t) {
+    drawShadow(0,0,t);
+  }
+  void draw(float dx, float dy, float t, boolean doMain) {
     if(doMain) {
-      draw(t0,t1,t2,t3,t);
+      draw(dx,dy,t);
     } else {
-      drawShadow(t0,t1,t2,t3,t);
+      drawShadow(dx,dy,t);
     }
   }
-  void draw(float t0, float t1, float t, boolean doMain) {
-    if(doMain) {
-      draw(t0,t1,t);
-    } else {
-      drawShadow(t0,t1,t);
-    }
+  void draw(float t, boolean doMain) {
+    draw(0,0,t,doMain);
   }
 }
 
@@ -89,9 +114,9 @@ class Point extends Element {
     h=P.h;
     v=P.v;
   }
-  protected void draw(float dx, float dy, float t0, float t1, float t2, float t3, float t, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
     if(label!=null) {
-      label.draw(dx,dy,t0,t1,t2,t3,t,baseColor,xofs,yofs);
+      label.draw(dx,dy,f,up,baseColor,xofs,yofs);
     }
   }
 }
@@ -125,20 +150,13 @@ class Text extends Element {
     //Text object as a Point label. Doesn't need bounding box constraint
     this(P.x,P.y,-1,-1,Lkolor,Lname,Lhorz,Lvert,Lofs);
   }
-  protected void draw(float dx, float dy, float t0, float t1, float t2, float t3, float t, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
     textSize(50);
     textAlign(horz,vert);
-    if(t<t0) {
-      return;
-    } else if(t<t1) {
-      fill(baseColor,linterp(t0,0,t1,255,t));
-    } else if(t<t2) {
-      fill(baseColor);
-    } else if(t<t3) {
-      fill(baseColor,linterp(t2,255,t3,0,t));
-    } else {
+    if(f==0) {
       return;
     }
+    fill(baseColor,f*255);
     float xx=x;
     if(ofs) {
       if(horz==LEFT) {
@@ -172,28 +190,22 @@ class Segment extends Element {
     P1=LP1;
     kolor=Lkolor;
   }
-  protected void draw(float dx, float dy, float t0, float t1, float t2, float t3, float t, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
     //Line will draw from P0 at time t0 to P1 at time t1, will start fading out at t2, and will be completely faded out at t3
-    if(t<t0) {
+    if(f==0) {
       return; //Not time to draw yet
-    } else if(t<t1) {
-      float x=linterp(t0,P0.x,t1,P1.x,t);
-      float y=linterp(t0,P0.y,t1,P1.y,t);
+    } else if (up) {
+      float x=linterp(0,P0.x,1,P1.x,f);
+      float y=linterp(0,P0.y,1,P1.y,f);
       stroke(baseColor);
       strokeWeight(5);
       line(P0.x+dx,P0.y+dy,x+dx,y+dy);
-    } else if(t<t2) {
-      stroke(baseColor);
-      strokeWeight(5);
-      line(P0.x+dx,P0.y+dy,P1.x+dx,P1.y+dy);
-    } else if(t<t3) {
-      float alpha=linterp(t2,255,t3,0,t);
+    } else {
+      float alpha=f*255;;
       strokeWeight(5);
       stroke(baseColor,alpha);
       line(P0.x+dx,P0.y+dy,P1.x+dx,P1.y+dy);
-    } else {
-      return; //Line has already faded away
-    }
+    } 
   }
 }
 
@@ -201,21 +213,13 @@ class Line extends Segment {
   Line(Point LP0, Point LP1, int Lkolor) {
     super(LP0,LP1,Lkolor);
   }
-  protected void draw(float dx, float dy, float t0, float t1, float t2, float t3, float t, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
     //Line will fade in from P0 at time t0 to P1 at time t1, will start fading out at t2, and will be completely faded out at t3
-    if(t<t0) {
+    if(f==0) {
       return; //Not time to draw yet
-    } else if(t<t1) {
-      float alpha=linterp(t0,0,t1,255,t);
-      stroke(kolor,alpha);
-    } else if(t<t2) {
-      stroke(kolor);
-    } else if(t<t3) {
-      float alpha=linterp(t2,255,t3,0,t);
-      stroke(kolor,alpha);
-    } else {
-      return; //Line has already faded away
     }
+    float alpha=f*255;
+    stroke(kolor,alpha);
     strokeWeight(3);
     float x0=linterp(0,P0.x,1,P1.x,-9);
     float y0=linterp(0,P0.y,1,P1.y,-9);
@@ -236,19 +240,11 @@ class Angle extends Element {
     f1=0.1;
     f2=0.2;
   }
-  protected void draw(float dx, float dy, float t0, float t1, float t2, float t3, float t, int baseColor, float xofs, float yofs) {
-    float alpha_scale;
-    if(t<t0) {
+  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
+    if(f==0) {
       return;
-    } else if(t<t1) {
-      alpha_scale=linterp(t0,0,t1,1,t);
-    } else if(t<t2) {
-      alpha_scale=1;
-    } else if(t<t3) {
-      alpha_scale=linterp(t2,1,t3,0,t);
-    } else {
-      return;
-    }
+    } 
+    float alpha_scale=f;
     Point Pa=new Point(O,P1,f1);
     Point Pb=new Point(O,P2,f1);
     stroke(baseColor,alpha_scale*255);

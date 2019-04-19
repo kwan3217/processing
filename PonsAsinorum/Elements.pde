@@ -234,3 +234,27 @@ interface Scene {
   void draw(float t);   
   float sceneTime();
 }
+
+class SceneArray implements Scene {
+  Scene[] subscene;
+  float sceneTimeSum;
+  SceneArray(Scene[] Lsubscene) {
+    subscene=Lsubscene;
+    for(int i=0;i<subscene.length;i++) {
+      sceneTimeSum+=subscene[i].sceneTime();
+    }
+  }
+  float sceneTime() {
+    return sceneTimeSum;
+  }
+  void draw(float t) {
+    float sceneT=0;
+    for(int i=0;i<subscene.length;i++) {
+      if(t>=sceneT && t<sceneT+subscene[i].sceneTime()) {
+        subscene[i].draw(t-sceneT);
+      } else {
+        sceneT+=subscene[i].sceneTime();
+      }
+    }
+  }
+}

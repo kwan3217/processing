@@ -4,11 +4,15 @@ float desiredFrameRate=24;
 
 Scene s;
 
+int shadowColor=#808080;
+float xshadow=10;
+float yshadow=10;
+boolean save=false;
 
 void setup() {
   //size(1920,1080,P2D);
   fullScreen(P2D);
-  frameRate(desiredFrameRate);
+  frameRate(1000/*desiredFrameRate*/);
   s=new SceneArray(new Scene[]{new Scene1()});
 }
 
@@ -20,7 +24,9 @@ void draw() {
     exit();
   }
   s.draw(t);
-  saveFrame("PonsAsinorium-#####.png");
+  if(save) {
+    saveFrame("PonsAsinorium-#####.png");
+  }
 }
                  
                  

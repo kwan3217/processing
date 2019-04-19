@@ -109,21 +109,7 @@ class Scene1 implements Scene {
     step[18]=new Text(100,300,800,#000000,"If it seems unnecessarily complicated, that's because it is.",LEFT,BASELINE,false);
     step[19]=new Text(100,600,800,#000000,"Let's try it a different way.",LEFT,BASELINE,false);
   }
-  void draw(float t) {
-    float MoveT0=45;
-    float MoveT1=48;
-    float MoveT2=108;
-    float MoveT3=111;
-    //Move to the center at the appropriate time
-    if(t<MoveT0) {
-    } else if(t<MoveT1) {
-      translate(linterp(MoveT0,0,MoveT1,-width*0.2,t),linterp(MoveT0,0,MoveT1,height*0.1,t));
-    } else if(t<MoveT2) {
-      translate(-width*0.2,height*0.1);
-    } else if(t<MoveT3) {
-      translate(linterp(MoveT3,0,MoveT2,-width*0.2,t),linterp(MoveT3,0,MoveT2,height*0.1,t));
-    } else {
-    }
+  void adjust(float t) {
     float MoveTri1T0=48;
     float MoveTri1T1=50;
     float MoveTri1T2=68;
@@ -262,105 +248,107 @@ class Scene1 implements Scene {
       FR.x=F.x;
       GR.x=G.x;
     }
+  }
+  void draw(float t, boolean doMain) {
     //This will draw under the triangle during construction of BD
-    lAB.draw(10,11,12,13,t);
+    lAB.draw(10,11,12,13,t,doMain);
     //This will draw under the triangle during construction of CE
-    lAC.draw(15,16,17,18,t);
+    lAC.draw(15,16,17,18,t,doMain);
     //Draw the triangle
-    A.draw(0,0.3,t);
-    B.draw(0.3,0.6,t);
-    AB.draw(0,1,t);
-    C.draw(1.0,1.3,t);
-    BC.draw(1,2,t);
-    CA.draw(2,3,t);
-    step[0].draw(0,0.5,9.5,10.0,t);
+    A.draw(0,0.3,t,doMain);
+    B.draw(0.3,0.6,t,doMain);
+    AB.draw(0,1,t,doMain);
+    C.draw(1.0,1.3,t,doMain);
+    BC.draw(1,2,t,doMain);
+    CA.draw(2,3,t,doMain);
+    step[0].draw(0,0.5,9.5,10.0,t,doMain);
     //Draw segment BD
     float fadetime=120;
-    BF.draw(11,12,fadetime,fadetime+1,t);fadetime+=0.5;
-    F.draw(11,11.5,fadetime,fadetime+1,t);fadetime+=0.5;
-    step[1].draw(10,10.5,14.5,15,t);
+    BF.draw(11,12,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    F.draw(11,11.5,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    step[1].draw(10,10.5,14.5,15,t,doMain);
     //Draw segment CE
-    CG.draw(16,17,fadetime,fadetime+1,t);fadetime+=0.5;
-    G.draw(16,16.5,fadetime,fadetime+1,t);fadetime+=0.5;
-    step[2].draw(15,15.5,19.5,20,t);
+    CG.draw(16,17,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    G.draw(16,16.5,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    step[2].draw(15,15.5,19.5,20,t,doMain);
     //Draw two new triangles
-    CF.draw(20,21,fadetime,fadetime+1,t);fadetime+=0.5;
-    CFLflash.draw(21,21,22,23,t);
-    AFLflash.draw(21,21,22,23,t);
-    ACLflash.draw(21,21,22,23,t);
-    BG.draw(23,24,fadetime,fadetime+1,t);fadetime+=0.5;
-    BGRflash.draw(24,24,25,26,t);
-    AGRflash.draw(24,24,25,26,t);
-    ABRflash.draw(24,24,25,26,t);
-    step[3].draw(20,20.5,27.5,28,t);
+    CF.draw(20,21,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    CFLflash.draw(21,21,22,23,t,doMain);
+    AFLflash.draw(21,21,22,23,t,doMain);
+    ACLflash.draw(21,21,22,23,t,doMain);
+    BG.draw(23,24,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    BGRflash.draw(24,24,25,26,t,doMain);
+    AGRflash.draw(24,24,25,26,t,doMain);
+    ABRflash.draw(24,24,25,26,t,doMain);
+    step[3].draw(20,20.5,27.5,28,t,doMain);
     //Show that AD and AE are congruent
-    step[4].draw(28,28.5,44.5,45,t);
-    ABLflash.draw(28,28,29,30,t);
-    BFLflash.draw(30,30,31,32,t);
-    AFLflash.draw(32,32,33,34,t);
-    step[5].draw(35,35.5,44.5,45,t);
-    ACRflash.draw(35,35,36,37,t);
-    CGRflash.draw(37,37,38,39,t);
-    AGRflash.draw(39,39,40,41,t);
+    step[4].draw(28,28.5,44.5,45,t,doMain);
+    ABLflash.draw(28,28,29,30,t,doMain);
+    BFLflash.draw(30,30,31,32,t,doMain);
+    AFLflash.draw(32,32,33,34,t,doMain);
+    step[5].draw(35,35.5,44.5,45,t,doMain);
+    ACRflash.draw(35,35,36,37,t,doMain);
+    CGRflash.draw(37,37,38,39,t,doMain);
+    AGRflash.draw(39,39,40,41,t,doMain);
     //Show tht ADC and AEB are congruent
-    step[6].draw(48,48.5,58,58.5,t);
+    step[6].draw(48,48.5,58,58.5,t,doMain);
     //Draw the outside triangles
-    ABL.draw(48,48,67,68,t);
-    ACL.draw(48,48,67,68,t);
-    BFL.draw(48,48,67,68,t);
-    CFL.draw(48,48,67,68,t);
-    ABR.draw(48,48,67,68,t);
-    ACR.draw(48,48,67,68,t);
-    BGR.draw(48,48,67,68,t);
-    CGR.draw(48,48,67,68,t);
+    ABL.draw(48,48,67,68,t,doMain);
+    ACL.draw(48,48,67,68,t,doMain);
+    BFL.draw(48,48,67,68,t,doMain);
+    CFL.draw(48,48,67,68,t,doMain);
+    ABR.draw(48,48,67,68,t,doMain);
+    ACR.draw(48,48,67,68,t,doMain);
+    BGR.draw(48,48,67,68,t,doMain);
+    CGR.draw(48,48,67,68,t,doMain);
     //Show the corresponding parts
-    BACL.draw(51,51,52,53,t);
-    BACR.draw(51,51,52,53,t);
-    BAC.draw(51,51,52,53,t);
-    ABLflash.draw(53,53,54,55,t);
-    BFLflash.draw(53,53,54,55,t);
-    ACRflash.draw(53,53,54,55,t);
-    CGRflash.draw(53,53,54,55,t);
-    ACLflash.draw(55,55,56,57,t);
-    ABRflash.draw(55,55,56,57,t);
+    BACL.draw(51,51,52,53,t,doMain);
+    BACR.draw(51,51,52,53,t,doMain);
+    BAC.draw(51,51,52,53,t,doMain);
+    ABLflash.draw(53,53,54,55,t,doMain);
+    BFLflash.draw(53,53,54,55,t,doMain);
+    ACRflash.draw(53,53,54,55,t,doMain);
+    CGRflash.draw(53,53,54,55,t,doMain);
+    ACLflash.draw(55,55,56,57,t,doMain);
+    ABRflash.draw(55,55,56,57,t,doMain);
     //Show the other parts as congruent
-    step[7].draw(59,59.5,69.5,70,t);
-    CFLflash.draw(60,60,61,62,t);
-    BGRflash.draw(60,60,61,62,t);
-    CFflash.draw(60,60,61,62,t);
-    BGflash.draw(60,60,61,62,t);
+    step[7].draw(59,59.5,69.5,70,t,doMain);
+    CFLflash.draw(60,60,61,62,t,doMain);
+    BGRflash.draw(60,60,61,62,t,doMain);
+    CFflash.draw(60,60,61,62,t,doMain);
+    BGflash.draw(60,60,61,62,t,doMain);
     if(t>60) {
       CFL.kolor=#0000ff;
       BGR.kolor=#0000ff;
       CF.kolor=#0000ff;
       BG.kolor=#0000ff;
     }
-    AGBR.draw(62,62,63,64,t);
-    AFCL.draw(62,62,63,64,t);
-    ABGR.draw(64,64,65,66,t);
-    ACFL.draw(64,64,65,66,t);
-    AGB.draw(62,62,fadetime,fadetime+1,t);fadetime+=0.5;
-    AFC.draw(62,62,fadetime,fadetime+1,t);fadetime+=0.5;
-    ABG.draw(64,64,fadetime,fadetime+1,t);fadetime+=0.5;
-    ACF.draw(64,64,fadetime,fadetime+1,t);fadetime+=0.5;
+    AGBR.draw(62,62,63,64,t,doMain);
+    AFCL.draw(62,62,63,64,t,doMain);
+    ABGR.draw(64,64,65,66,t,doMain);
+    ACFL.draw(64,64,65,66,t,doMain);
+    AGB.draw(62,62,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    AFC.draw(62,62,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    ABG.draw(64,64,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    ACF.draw(64,64,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
     //Show off the small triangles
-    step[8].draw(70,70.5,74.5,75,t);
-    BFL.draw(70,70,84,85,t);
-    BCL.draw(70,70,84,85,t);
-    CFL.draw(70,70,84,85,t);
-    CGR.draw(70,70,84,85,t);
-    BGR.draw(70,70,84,85,t);
-    BCR.draw(70,70,84,85,t);
-    AFCL.draw(70,70,84,85,t);
-    AGBR.draw(70,70,84,85,t);
-    step[9].draw(75,75.5,84.5,85,t);
-    step[10].draw(80,80.5,84.5,85,t);
-    BCFL.draw(81,81,82,83,t);
-    CBGR.draw(81,81,82,83,t);
-    BCF.draw(81,81,fadetime,fadetime+1,t);fadetime+=0.5;
-    CBG.draw(81,81,fadetime,fadetime+1,t);fadetime+=1.5;
+    step[8].draw(70,70.5,74.5,75,t,doMain);
+    BFL.draw(70,70,84,85,t,doMain);
+    BCL.draw(70,70,84,85,t,doMain);
+    CFL.draw(70,70,84,85,t,doMain);
+    CGR.draw(70,70,84,85,t,doMain);
+    BGR.draw(70,70,84,85,t,doMain);
+    BCR.draw(70,70,84,85,t,doMain);
+    AFCL.draw(70,70,84,85,t,doMain);
+    AGBR.draw(70,70,84,85,t,doMain);
+    step[9].draw(75,75.5,84.5,85,t,doMain);
+    step[10].draw(80,80.5,84.5,85,t,doMain);
+    BCFL.draw(81,81,82,83,t,doMain);
+    CBGR.draw(81,81,82,83,t,doMain);
+    BCF.draw(81,81,fadetime,fadetime+1,t,doMain);fadetime+=0.5;
+    CBG.draw(81,81,fadetime,fadetime+1,t,doMain);fadetime+=1.5;
     //Show the three angles on the left
-    step[11].draw(85,85.5,94.5,95,t);
+    step[11].draw(85,85.5,94.5,95,t,doMain);
     ABCL.draw(0,0,85,86,fadetime,fadetime+1,t);fadetime+=0.5;
     CBGL.draw(0,5,86,87,96,97,t);
     ABGL.draw(-10,7.5,87,88,97,98,t);
@@ -369,7 +357,7 @@ class Scene1 implements Scene {
     BCFR.draw(0,5,91,92,96,97,t);
     ACFR.draw(10,7.5,92,93,97,98,t);
     //Subtract the two known equal angles
-    step[13].draw(95,95.5,99.5,100,t);
+    step[13].draw(95,95.5,99.5,100,t,doMain);
   
     //Show the remaining angles to be congruent
     if(t>100 && t<102) {
@@ -379,12 +367,33 @@ class Scene1 implements Scene {
       ABCL.kolor=color(#ffffff);
       ACBR.kolor=color(#ffffff);
     }
-    step[14].draw(100,100.5,109.5,110,t);
-    step[15].draw(103,103.5,109.5,110,t);
+    step[14].draw(100,100.5,109.5,110,t,doMain);
+    step[15].draw(103,103.5,109.5,110,t,doMain);
     //Talk about why it is called what it is called.
-    step[16].draw(110,110.5,119.5,120,t);
-    step[17].draw(115,115.5,119.5,120,t);
-    step[18].draw(120,120.5,129.5,130,t);
-    step[19].draw(125,125.5,129.5,130,t);
+    step[16].draw(110,110.5,119.5,120,t,doMain);
+    step[17].draw(115,115.5,119.5,120,t,doMain);
+    step[18].draw(120,120.5,129.5,130,t,doMain);
+    step[19].draw(125,125.5,129.5,130,t,doMain);
+  }
+  
+  void draw(float t) {
+    float MoveT0=45;
+    float MoveT1=48;
+    float MoveT2=108;
+    float MoveT3=111;
+    //Move to the center at the appropriate time
+    if(t<MoveT0) {
+    } else if(t<MoveT1) {
+      translate(linterp(MoveT0,0,MoveT1,-width*0.2,t),linterp(MoveT0,0,MoveT1,height*0.1,t));
+    } else if(t<MoveT2) {
+      translate(-width*0.2,height*0.1);
+    } else if(t<MoveT3) {
+      translate(linterp(MoveT3,0,MoveT2,-width*0.2,t),linterp(MoveT3,0,MoveT2,height*0.1,t));
+    } else {
+    }
+    
+    adjust(t);
+    //draw(t,false);
+    draw(t,true);
   }
 }

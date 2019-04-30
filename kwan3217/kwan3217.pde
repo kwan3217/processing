@@ -108,7 +108,7 @@ void draw() { //<>//
     drawString(E .substring(0,2),450+100*spread,( 1-(spread*spread))*lineHeight/2,(t-1)*letterSpeed-2,1       ,100*(1+spread));
   }
   if(t>(Scene1len+Scene2len+Scene3len)) exit();
-  saveFrame("kwan3217-#####.png");
+  //saveFrame("kwan3217-#####.png");
 }
                  
                  

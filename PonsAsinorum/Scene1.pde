@@ -1,12 +1,8 @@
-class Scene1 implements Scene {
+class Scene1 extends ElementLayerScene {
   Point A,B,C,F,G;
   Point AL,BL,CL,FL,GL;
   Point AR,BR,CR,FR,GR;
   Segment AB,CA,BC,BF,CG,CF,BG;
-  Segment AFLflash,CFLflash,ABLflash,ACLflash;
-  Segment AGRflash,BGRflash,ABRflash,ACRflash;
-  Segment BFLflash,CGRflash;
-  Segment BGflash,CFflash;
   Segment CFL,ABL,ACL;
   Segment BGR,ABR,ACR;
   Segment BFL,CGR;
@@ -18,76 +14,63 @@ class Scene1 implements Scene {
   Line lAB,lAC;
   Text[] PointLabel=new Text[5];
   Text[] step=new Text[20];
-  ArrayList<Element> elements=new ArrayList<Element>();
   float sceneTime() {return 130;}
   Scene1() {
-    A=new Point(width*0.7,height*0.2);elements.add(A);PointLabel[0]=new Text(A,#ff0000,"A",LEFT,BASELINE, true);A.label=PointLabel[0];
-    B=new Point(width*0.6,height*0.6);elements.add(B);PointLabel[1]=new Text(B,#FF8000,"B",RIGHT,BASELINE, true);B.label=PointLabel[1];  
-    C=new Point(width*0.8,height*0.6);elements.add(C);PointLabel[2]=new Text(C,#FF8000,"C",LEFT,BASELINE, true);C.label=PointLabel[2];
-    F=new Point(A,B,1.3);elements.add(F);PointLabel[3]=new Text(F,#000000,"F",RIGHT,BASELINE, true);F.label=PointLabel[3];
-    G=new Point(A,C,1.3);elements.add(G);PointLabel[4]=new Text(G,#000000,"G",LEFT,BASELINE, true);G.label=PointLabel[4];
-    AL=new Point(A.x,A.y);elements.add(AL);
-    BL=new Point(B.x,B.y);elements.add(BL);
-    CL=new Point(C.x,C.y);elements.add(CL);
-    FL=new Point(F.x,F.y);elements.add(FL);
-    GL=new Point(G.x,G.y);elements.add(GL);
-    AR=new Point(A.x,A.y);elements.add(AR);
-    BR=new Point(B.x,B.y);elements.add(BR);
-    CR=new Point(C.x,C.y);elements.add(CR);
-    FR=new Point(F.x,F.y);elements.add(FR);
-    GR=new Point(G.x,G.y);elements.add(GR);
-    ABCL=new Angle(AL,BL,CL,#000000);elements.add(ABCL);
-    ACBR=new Angle(AR,CR,BR,#000000);elements.add(ACBR);
-    BACL=new Angle(BL,AL,CL,#ffffff);elements.add(BACL);
-    BACR=new Angle(BR,AR,CR,#ffffff);elements.add(BACR);
-    AFCL=new Angle(AL,FL,CL,#00ff00);elements.add(AFCL);
-    AGBR=new Angle(AR,GR,BR,#00ff00);elements.add(AGBR);
-    ACFL=new Angle(AL,CL,FL,#ff8000);elements.add(ACFL);
-    ACFR=new Angle(AR,CR,FR,#ff8000);elements.add(ACFR);
-    ABGR=new Angle(AR,BR,GR,#ff8000);elements.add(ABGR);
-    ABGL=new Angle(AL,BL,GL,#ff8000);elements.add(ABGL);
-    BCFL=new Angle(BL,CL,FL,#ff00ff);elements.add(BCFL);
-    BCFR=new Angle(BR,CR,FR,#ff00ff);elements.add(BCFR);
-    CBGL=new Angle(CL,BL,GL,#ff00ff);elements.add(CBGL);
-    CBGR=new Angle(CR,BR,GR,#ff00ff);elements.add(CBGR);
-    BCF=new Angle(B,C,F,#ff00ff);elements.add(BCF);
-    CBG=new Angle(C,B,G,#ff00ff);elements.add(CBG);
-    BAC=new Angle(B,A,C,#ffffff);elements.add(BAC);
-    AFC=new Angle(A,F,C,#00ff00);elements.add(AFC);
-    AGB=new Angle(A,G,B,#00ff00);elements.add(AGB);
-    ACF=new Angle(A,C,F,#ff8000);elements.add(ACF);
-    ABG=new Angle(A,B,G,#ff8000);elements.add(ABG);
-    AB=new Segment(A,B,#FF0000);elements.add(AB);
-    lAB=new Line(A,B,#404040);elements.add(lAB);
-    CA=new Segment(C,A,#FF0000);elements.add(CA);
-    lAC=new Line(A,C,#404040);elements.add(lAC);
-    BC=new Segment(B,C,#000000);elements.add(BC);
-    BF=new Segment(B,F,#FFFF00);elements.add(BF);
-    CG=new Segment(C,G,#FFFF00);elements.add(CG);
-    CF=new Segment(C,F,#000000);elements.add(CF);
-    BG=new Segment(B,G,#000000);elements.add(BG);
-    ABLflash=new Segment(AL,BL,#ffffff);elements.add(ABLflash);
-    ACLflash=new Segment(AL,CL,#ffffff);elements.add(ACLflash);
-    ABRflash=new Segment(AR,BR,#ffffff);elements.add(ABRflash);
-    ACRflash=new Segment(AR,CR,#ffffff);elements.add(ACRflash);
-    AFLflash=new Segment(AL,FL,#ffffff);elements.add(AFLflash);
-    AGRflash=new Segment(AR,GR,#ffffff);elements.add(AGRflash);
-    BGRflash=new Segment(BR,GR,#ffffff);elements.add(BGRflash);
-    CFLflash=new Segment(CL,FL,#ffffff);elements.add(CFLflash);
-    BFLflash=new Segment(BL,FL,#ffffff);elements.add(BFLflash);
-    CGRflash=new Segment(CR,GR,#ffffff);elements.add(CGRflash);
-    BGflash=new Segment(B,G,#ffffff);elements.add(BGflash);
-    CFflash=new Segment(C,F,#ffffff);elements.add(CFflash);
-    ABL=new Segment(AL,BL,AB.kolor);
-    ACL=new Segment(AL,CL,CA.kolor);
-    ABR=new Segment(AR,BR,AB.kolor);
-    ACR=new Segment(AR,CR,CA.kolor);
-    BGR=new Segment(BR,GR,BG.kolor);
-    CFL=new Segment(CL,FL,CF.kolor);
-    BFL=new Segment(BL,FL,BF.kolor);
-    CGR=new Segment(CR,GR,CG.kolor);
-    BCL=new Segment(BL,CL,BC.kolor);
-    BCR=new Segment(BR,CR,BC.kolor);
+    A=(Point)add(new Point(width*0.7,height*0.2));PointLabel[0]=new Text(A,#ff0000,"A",LEFT,BASELINE, true);A.label=PointLabel[0];
+    B=(Point)add(new Point(width*0.6,height*0.6));PointLabel[1]=new Text(B,#FF8000,"B",RIGHT,BASELINE, true);B.label=PointLabel[1];  
+    C=(Point)add(new Point(width*0.8,height*0.6));PointLabel[2]=new Text(C,#FF8000,"C",LEFT,BASELINE, true);C.label=PointLabel[2];
+    F=(Point)add(new Point(A,B,1.3));PointLabel[3]=new Text(F,#000000,"F",RIGHT,BASELINE, true);F.label=PointLabel[3];
+    G=(Point)add(new Point(A,C,1.3));PointLabel[4]=new Text(G,#000000,"G",LEFT,BASELINE, true);G.label=PointLabel[4];
+    AL=(Point)add(new Point(A.x,A.y));
+    BL=(Point)add(new Point(B.x,B.y));
+    CL=(Point)add(new Point(C.x,C.y));
+    FL=(Point)add(new Point(F.x,F.y));
+    GL=(Point)add(new Point(G.x,G.y));
+    AR=(Point)add(new Point(A.x,A.y));
+    BR=(Point)add(new Point(B.x,B.y));
+    CR=(Point)add(new Point(C.x,C.y));
+    FR=(Point)add(new Point(F.x,F.y));
+    GR=(Point)add(new Point(G.x,G.y));
+    lAB=(Line)add(new Line(A,B,#404040));
+    lAC=(Line)add(new Line(A,C,#404040));
+    ABCL=(Angle)add(new Angle(AL,BL,CL,#000000));
+    ACBR=(Angle)add(new Angle(AR,CR,BR,#000000));
+    BACL=(Angle)add(new Angle(BL,AL,CL,#ffffff));
+    BACR=(Angle)add(new Angle(BR,AR,CR,#ffffff));
+    AFCL=(Angle)add(new Angle(AL,FL,CL,#00ff00));
+    AGBR=(Angle)add(new Angle(AR,GR,BR,#00ff00));
+    ACFL=(Angle)add(new Angle(AL,CL,FL,#ff8000));
+    ACFR=(Angle)add(new Angle(AR,CR,FR,#ff8000));
+    ABGR=(Angle)add(new Angle(AR,BR,GR,#ff8000));
+    ABGL=(Angle)add(new Angle(AL,BL,GL,#ff8000));
+    BCFL=(Angle)add(new Angle(BL,CL,FL,#ff00ff));
+    BCFR=(Angle)add(new Angle(BR,CR,FR,#ff00ff));
+    CBGL=(Angle)add(new Angle(CL,BL,GL,#ff00ff));
+    CBGR=(Angle)add(new Angle(CR,BR,GR,#ff00ff));
+    BCF=(Angle)add(new Angle(B,C,F,#ff00ff));
+    CBG=(Angle)add(new Angle(C,B,G,#ff00ff));
+    BAC=(Angle)add(new Angle(B,A,C,#ffffff));
+    AFC=(Angle)add(new Angle(A,F,C,#00ff00));
+    AGB=(Angle)add(new Angle(A,G,B,#00ff00));
+    ACF=(Angle)add(new Angle(A,C,F,#ff8000));
+    ABG=(Angle)add(new Angle(A,B,G,#ff8000));
+    AB=(Segment)add(new Segment(A,B,#FF0000));
+    CA=(Segment)add(new Segment(C,A,#FF0000));
+    BC=(Segment)add(new Segment(B,C,#000000));
+    BF=(Segment)add(new Segment(B,F,#FFFF00));
+    CG=(Segment)add(new Segment(C,G,#FFFF00));
+    CF=(Segment)add(new Segment(C,F,#000000));
+    BG=(Segment)add(new Segment(B,G,#000000));
+    ABL=(Segment)add(new Segment(AL,BL,AB.kolor));
+    ACL=(Segment)add(new Segment(AL,CL,CA.kolor));
+    ABR=(Segment)add(new Segment(AR,BR,AB.kolor));
+    ACR=(Segment)add(new Segment(AR,CR,CA.kolor));
+    BGR=(Segment)add(new Segment(BR,GR,BG.kolor));
+    CFL=(Segment)add(new Segment(CL,FL,CF.kolor));
+    BFL=(Segment)add(new Segment(BL,FL,BF.kolor));
+    CGR=(Segment)add(new Segment(CR,GR,CG.kolor));
+    BCL=(Segment)add(new Segment(BL,CL,BC.kolor));
+    BCR=(Segment)add(new Segment(BR,CR,BC.kolor));
     step[ 0]=new Text(100,100,700,#000000,"Draw a triangle ABC with sides AB and AC equal. Two sides are equal, but are two angles?",LEFT,BASELINE,false);
     step[ 1]=new Text(100,150,700,#000000,"Pick a point F on the line through AB some distance past B, and draw segment BF.",LEFT,BASELINE,false);
     step[ 2]=new Text(100,200,700,#000000,"Find the point G on the line through AC such that the length of CG is the same as the length of BF.",LEFT,BASELINE,false);
@@ -109,7 +92,7 @@ class Scene1 implements Scene {
     step[18]=new Text(100,300,800,#000000,"If it seems unnecessarily complicated, that's because it is.",LEFT,BASELINE,false);
     step[19]=new Text(100,600,800,#000000,"Let's try it a different way.",LEFT,BASELINE,false);
     for(Element E:step){
-      elements.add(E);
+      add(E);
     }
 
     lAB.addFade(10,11,12,13);
@@ -134,23 +117,27 @@ class Scene1 implements Scene {
     step[2].addFade(15,15.5,19.5,20);
     //Draw two new triangles
     CF.addFade(20,21,fadetime,fadetime+1);fadetime+=0.5;
-    CFLflash.addFade(21,21,22,23);
-    AFLflash.addFade(21,21,22,23);
-    ACLflash.addFade(21,21,22,23);
+    CFL.addFlash(21,21,22,23);
+    ABL.addFlash(21,21,22,23);
+    BFL.addFlash(21,21,22,23);
+    ACL.addFlash(21,21,22,23);
     BG.addFade(23,24,fadetime,fadetime+1);fadetime+=0.5;
-    BGRflash.addFade(24,24,25,26);
-    AGRflash.addFade(24,24,25,26);
-    ABRflash.addFade(24,24,25,26);
+    BGR.addFlash(24,24,25,26);
+    ACR.addFlash(24,24,25,26);
+    CGR.addFlash(24,24,25,26);
+    ABR.addFlash(24,24,25,26);
     step[3].addFade(20,20.5,27.5,28);
     //Show that AD and AE are congruent
     step[4].addFade(28,28.5,44.5,45);
-    ABLflash.addFade(28,28,29,30);
-    BFLflash.addFade(30,30,31,32);
-    AFLflash.addFade(32,32,33,34);
+    ABL.addFlash(28,28,29,30);
+    BFL.addFlash(30,30,31,32);
+    ABL.addFlash(32,32,33,34);
+    BFL.addFlash(32,32,33,34);
     step[5].addFade(35,35.5,44.5,45);
-    ACRflash.addFade(35,35,36,37);
-    CGRflash.addFade(37,37,38,39);
-    AGRflash.addFade(39,39,40,41);
+    ACR.addFlash(35,35,36,37);
+    CGR.addFlash(37,37,38,39);
+    ACR.addFlash(39,39,40,41);
+    CGR.addFlash(39,39,40,41);
     //Show tht ADC and AEB are congruent
     step[6].addFade(48,48.5,58,58.5);
     //Draw the outside triangles
@@ -166,18 +153,18 @@ class Scene1 implements Scene {
     BACL.addFade(51,51,52,53);
     BACR.addFade(51,51,52,53);
     BAC.addFade(51,51,52,53);
-    ABLflash.addFade(53,53,54,55);
-    BFLflash.addFade(53,53,54,55);
-    ACRflash.addFade(53,53,54,55);
-    CGRflash.addFade(53,53,54,55);
-    ACLflash.addFade(55,55,56,57);
-    ABRflash.addFade(55,55,56,57);
+    ABL.addFlash(53,53,54,55);
+    //BFL.addflash(53,53,54,55);
+    //ACR.addflash(53,53,54,55);
+    //CGR.addflash(53,53,54,55);
+    //ACL.addflash(55,55,56,57);
+    //ABR.addflash(55,55,56,57);
     //Show the other parts as congruent
     step[7].addFade(59,59.5,69.5,70);
-    CFLflash.addFade(60,60,61,62);
-    BGRflash.addFade(60,60,61,62);
-    CFflash.addFade(60,60,61,62);
-    BGflash.addFade(60,60,61,62);
+    CFL.addFlash(60,60,61,62);
+    BG.addFlash(60,60,61,62);
+    CF.addFlash(60,60,61,62);
+    BG.addFlash(60,60,61,62);
     AGBR.addFade(62,62,63,64);
     AFCL.addFade(62,62,63,64);
     ABGR.addFade(64,64,65,66);
@@ -224,6 +211,21 @@ class Scene1 implements Scene {
 
   }
   void adjust(float t) {
+    float MoveT0=45;
+    float MoveT1=48;
+    float MoveT2=108;
+    float MoveT3=111;
+    //Move to the center at the appropriate time
+    if(t<MoveT0) {
+    } else if(t<MoveT1) {
+      translate(linterp(MoveT0,0,MoveT1,-width*0.2,t),linterp(MoveT0,0,MoveT1,height*0.1,t));
+    } else if(t<MoveT2) {
+      translate(-width*0.2,height*0.1);
+    } else if(t<MoveT3) {
+      translate(linterp(MoveT3,0,MoveT2,-width*0.2,t),linterp(MoveT3,0,MoveT2,height*0.1,t));
+    } else {
+    }
+
     float MoveTri1T0=48;
     float MoveTri1T1=50;
     float MoveTri1T2=68;
@@ -376,31 +378,5 @@ class Scene1 implements Scene {
       ABCL.kolor=color(#ffffff);
       ACBR.kolor=color(#ffffff);
     }
-  }
-  void draw(float t, boolean doMain) {
-    for(Element E:elements) {
-      E.draw(t,doMain);
-    }
-  }
-  
-  void draw(float t) {
-    float MoveT0=45;
-    float MoveT1=48;
-    float MoveT2=108;
-    float MoveT3=111;
-    //Move to the center at the appropriate time
-    if(t<MoveT0) {
-    } else if(t<MoveT1) {
-      translate(linterp(MoveT0,0,MoveT1,-width*0.2,t),linterp(MoveT0,0,MoveT1,height*0.1,t));
-    } else if(t<MoveT2) {
-      translate(-width*0.2,height*0.1);
-    } else if(t<MoveT3) {
-      translate(linterp(MoveT3,0,MoveT2,-width*0.2,t),linterp(MoveT3,0,MoveT2,height*0.1,t));
-    } else {
-    }
-    
-    adjust(t);
-    //draw(t,false);
-    draw(t,true);
   }
 }

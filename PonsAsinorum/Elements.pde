@@ -4,15 +4,22 @@ float linterp(float x0, float y0, float x1, float y1, float x) {
   return result;
 }
 
-class TimeTrap {
+int linterp_c(float x0, int c0, float x1, int c1, float x) {
+  float r=linterp(x0,red(c0),x1,red(c1),x); //<>//
+  float g=linterp(x0,red(c0),x1,red(c1),x);
+  float b=linterp(x0,red(c0),x1,red(c1),x);
+  return color(r,g,b);
+}
+
+class ScalarTrap {
   public float t0,t1,t2,t3;
-  TimeTrap(float Lt0, float Lt1, float Lt2, float Lt3) {
+  ScalarTrap(float Lt0, float Lt1, float Lt2, float Lt3) {
     t0=Lt0;
     t1=Lt1;
     t2=Lt2;
     t3=Lt3;
   }
-  TimeTrap(float Lt0, float Lt1) {
+  ScalarTrap(float Lt0, float Lt1) {
     this(Lt0,Lt1,9999999,9999999);
   }
   float eval(float t) {
@@ -33,51 +40,87 @@ class TimeTrap {
   }
 }
 
-abstract class Element {
-  protected int kolor;
-  protected ArrayList<TimeTrap> fadeList;
-  float fade(float t) {
+class ScalarTraps extends ArrayList<ScalarTrap> {
+  float eval(float t) {
     float result=0;
-    for(TimeTrap fadeTrap:fadeList) {
-      result+=fadeTrap.eval(t);
+    for(ScalarTrap trap:this) {
+      result+=trap.eval(t);
     }
     return result;
   }
   boolean up(float t) {
     boolean result=false;
-    for(TimeTrap fadeTrap:fadeList) {
-      result|=fadeTrap.up(t);
+    for(ScalarTrap trap:this) {
+      result|=trap.up(t);
     }
     return result;
   }
-  Element(int Lkolor, ArrayList<TimeTrap> LfadeList) {
+}
+    
+class ColorTrap extends ScalarTrap {
+  int kolor;
+  ColorTrap(float Lt0, float Lt1, float Lt2, float Lt3, int Lkolor) {
+    super(Lt0,Lt1,Lt2,Lt3);
     kolor=Lkolor;
-    fadeList=LfadeList;
   }
+  int eval(float t, int basecolor) {
+    return linterp_c(0,basecolor,1,kolor,eval(t));
+  }
+}
+
+class ColorTraps extends ArrayList<ColorTrap> {
+  int eval(float t, int basecolor) {
+    int result=#000000;
+    for(ColorTrap trap:this) {
+      result+=trap.eval(t,basecolor);
+    }
+    return result;
+  }
+  boolean up(float t) {
+    boolean result=false;
+    for(ColorTrap trap:this) {
+      result|=trap.up(t);
+    }
+    return result;
+  }
+}
+
+abstract class Element {
+  protected int kolor;
+  protected ScalarTraps fadeList;
+  protected ColorTraps flashList;
   Element(int Lkolor) {
-    this(Lkolor,new ArrayList<TimeTrap>());
+    kolor=Lkolor;
+    fadeList=new ScalarTraps();
+    flashList=new ColorTraps();
   }
   Element() {
     this(#000000);
   }
-  void addFade(TimeTrap T) {
+  void addFade(ScalarTrap T) {
     fadeList.add(T);
   }
   void addFade(float t0, float t1, float t2, float t3) {
-    fadeList.add(new TimeTrap(t0,t1,t2,t3));
+    fadeList.add(new ScalarTrap(t0,t1,t2,t3));
   }
   void addFade(float t0, float t1) {
-    fadeList.add(new TimeTrap(t0,t1));
+    fadeList.add(new ScalarTrap(t0,t1));
+  }
+  void addFlash(float t0, float t1, float t2, float t3, int Lkolor) {
+    flashList.add(new ColorTrap(t0,t1,t2,t3,Lkolor));
+  }
+  void addFlash(float t0, float t1, float t2, float t3) {
+    addFlash(t0,t1,t2,t3,#ffffff); //<>//
   }
   protected abstract void draw(float dx, float dy, float Lfade, boolean up, int baseColor, float xofs, float yofs); 
   void draw(float dx, float dy, float t) {
-    draw(dx,dy,fade(t),up(t),kolor,0,0);
+    draw(dx,dy,fadeList.eval(t),fadeList.up(t),flashList.eval(t,kolor),0,0);
   }
   void draw(float t) {
-    draw(0,0,fade(t));
+    draw(0,0,fadeList.eval(t));
   }
   void drawShadow(float dx, float dy, float t) {
-    draw(dx,dy,fade(t),up(t),shadowColor,xshadow,yshadow);
+    draw(dx,dy,fadeList.eval(t),fadeList.up(t),shadowColor,xshadow,yshadow);
   }
   void drawShadow(float t) {
     drawShadow(0,0,t);
@@ -272,6 +315,7 @@ class Angle extends Element {
 interface Scene {
   void draw(float t);   
   float sceneTime();
+  
 }
 
 class SceneArray implements Scene {
@@ -296,4 +340,37 @@ class SceneArray implements Scene {
       }
     }
   }
+}
+
+abstract class ElementLayerScene implements Scene {
+  private ArrayList<ArrayList<Element>> layers;
+  private int currentLayer;
+  ElementLayerScene() {
+    layers=new ArrayList<ArrayList<Element>>();
+    setLayer(0);
+  }
+  void setLayer(int LcurrentLayer) {
+    currentLayer=LcurrentLayer;
+    while(currentLayer>=layers.size()) {
+      layers.add(new ArrayList<Element>());
+    }
+  }
+  Element add(Element E) {
+    layers.get(currentLayer).add(E);
+    return E;
+  }
+  private void draw(float t, boolean doMain) {
+    for(ArrayList<Element> layer:layers) {
+      for(Element E:layer) {
+        E.draw(t,doMain);
+      }
+    }
+  }
+  @Override 
+  void draw(float t) {
+    adjust(t);
+    //draw(t,false);
+    draw(t,true);
+  }
+  void adjust(float t) {}
 }

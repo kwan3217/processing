@@ -10,9 +10,9 @@ float yshadow=10;
 boolean save=false;
 
 void setup() {
-  //size(1920,1080,P2D);
-  fullScreen(P2D);
-  frameRate(1000/*desiredFrameRate*/);
+  size(853,480,P2D);
+  //fullScreen(P2D);
+  frameRate(desiredFrameRate);
   s=new SceneArray(new Scene[]{new Scene1()});
 }
 

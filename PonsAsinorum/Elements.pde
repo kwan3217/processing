@@ -5,9 +5,17 @@ float linterp(float x0, float y0, float x1, float y1, float x) {
 }
 
 int linterp_c(float x0, int c0, float x1, int c1, float x) {
-  float r=linterp(x0,red(c0),x1,red(c1),x); //<>//
-  float g=linterp(x0,red(c0),x1,red(c1),x);
-  float b=linterp(x0,red(c0),x1,red(c1),x);
+  //print("x0: ",x0,"\n");
+  //print("c0: ",String.format("#%08x",c0),"\n");
+  //print("x1: ",x1,"\n");
+  //print("c1: ",String.format("#%08x",c1),"\n");
+  float r=linterp(x0,red(c0),x1,red(c1),x); //<>// //<>//
+  //print(String.format("r=linterp(x0=%f,red(c0)=%f,x1=%f,red(c1)=%f,x=%f)=%f\n",x0,red(c0),x1,red(c1),x,r));
+  float g=linterp(x0,green(c0),x1,green(c1),x);
+  //print(String.format("g=linterp(x0=%f,grn(c0)=%f,x1=%f,grn(c1)=%f,x=%f)=%f\n",x0,green(c0),x1,green(c1),x,g));
+  float b=linterp(x0,blue(c0),x1,blue(c1),x);
+  //print(String.format("b=linterp(x0=%f,blu(c0)=%f,x1=%f,blu(c1)=%f,x=%f)=%f\n",x0,blue(c0),x1,blue(c1),x,b));
+  //print(String.format("color(r=%f,g=%f,b=%f)=#%08x\n",r,g,b,color(r,g,b)));
   return color(r,g,b);
 }
 
@@ -38,20 +46,25 @@ class ScalarTrap {
   boolean up(float t){
     return t<t2;
   }
+  String toString() {
+    return String.format("ScalarTrap(t0=%f,t1=%f,t2=%f,t3=%f)",t0,t1,t2,t3);
+  }
 }
 
 class ScalarTraps extends ArrayList<ScalarTrap> {
+  float valIfEmpty;
+  ScalarTraps(float LvalIfEmpty) {
+    super();
+    valIfEmpty=LvalIfEmpty;
+  }
+  ScalarTraps() {
+    this(0);
+  }
   float eval(float t) {
+    if(size()==0) return valIfEmpty;
     float result=0;
     for(ScalarTrap trap:this) {
       result+=trap.eval(t);
-    }
-    return result;
-  }
-  boolean up(float t) {
-    boolean result=false;
-    for(ScalarTrap trap:this) {
-      result|=trap.up(t);
     }
     return result;
   }
@@ -60,38 +73,39 @@ class ScalarTraps extends ArrayList<ScalarTrap> {
 class ColorTrap extends ScalarTrap {
   int kolor;
   ColorTrap(float Lt0, float Lt1, float Lt2, float Lt3, int Lkolor) {
-    super(Lt0,Lt1,Lt2,Lt3);
+    super(Lt0,Lt1,Lt2,Lt3); //<>// //<>//
     kolor=Lkolor;
   }
   int eval(float t, int basecolor) {
     return linterp_c(0,basecolor,1,kolor,eval(t));
   }
+  String toString() {
+    return String.format("ColorTrap(t0=%f,t1=%f,t2=%f,t3=%f,kolor=0x%08x)",t0,t1,t2,t3,kolor);
+  }
 }
 
 class ColorTraps extends ArrayList<ColorTrap> {
   int eval(float t, int basecolor) {
-    int result=#000000;
     for(ColorTrap trap:this) {
-      result+=trap.eval(t,basecolor);
+      //print(trap.toString()+"\n");
+      if(trap.eval(t)>0) {
+        //print("In trap "+trap.toString()+"\n");
+        return linterp_c(0,basecolor,1,trap.kolor,trap.eval(t));
+      }
     }
-    return result;
-  }
-  boolean up(float t) {
-    boolean result=false;
-    for(ColorTrap trap:this) {
-      result|=trap.up(t);
-    }
-    return result;
+    return basecolor;
   }
 }
 
 abstract class Element {
   protected int kolor;
+  protected ScalarTraps drawList;
   protected ScalarTraps fadeList;
   protected ColorTraps flashList;
   Element(int Lkolor) {
     kolor=Lkolor;
-    fadeList=new ScalarTraps();
+    drawList=new ScalarTraps(1);
+    fadeList=new ScalarTraps(1);
     flashList=new ColorTraps();
   }
   Element() {
@@ -106,21 +120,37 @@ abstract class Element {
   void addFade(float t0, float t1) {
     fadeList.add(new ScalarTrap(t0,t1));
   }
+  void addDraw(ScalarTrap T) {
+    drawList.add(T);
+  }
+  void addDraw(float t0, float t1, float t2, float t3) {
+    drawList.add(new ScalarTrap(t0,t1,t2,t3));
+  }
+  void addDraw(float t0, float t1) {
+    drawList.add(new ScalarTrap(t0,t1));
+  }
   void addFlash(float t0, float t1, float t2, float t3, int Lkolor) {
     flashList.add(new ColorTrap(t0,t1,t2,t3,Lkolor));
   }
   void addFlash(float t0, float t1, float t2, float t3) {
-    addFlash(t0,t1,t2,t3,#ffffff); //<>//
+    addFlash(t0,t1,t2,t3,#ffffff);
   }
-  protected abstract void draw(float dx, float dy, float Lfade, boolean up, int baseColor, float xofs, float yofs); 
+  protected abstract void draw(float dx, float dy, float Lfade, float Ldraw, int baseColor, float xofs, float yofs); 
   void draw(float dx, float dy, float t) {
-    draw(dx,dy,fadeList.eval(t),fadeList.up(t),flashList.eval(t,kolor),0,0);
+    float f=fadeList.eval(t);
+    float d=drawList.eval(t);
+    if(f==0||d==0) return;
+    //print(String.format("draw(...t=%f...)\n",t));
+    //print(String.format("kolor=%08x\n",kolor));
+    int k=flashList.eval(t,kolor);
+    //print(String.format("k=%08x\n",k));
+    draw(dx,dy,fadeList.eval(t),drawList.eval(t),k,0,0);
   }
   void draw(float t) {
-    draw(0,0,fadeList.eval(t));
+    draw(0,0,t);
   }
   void drawShadow(float dx, float dy, float t) {
-    draw(dx,dy,fadeList.eval(t),fadeList.up(t),shadowColor,xshadow,yshadow);
+    draw(dx,dy,fadeList.eval(t),drawList.eval(t),shadowColor,xshadow,yshadow);
   }
   void drawShadow(float t) {
     drawShadow(0,0,t);
@@ -157,9 +187,9 @@ class Point extends Element {
     h=P.h;
     v=P.v;
   }
-  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, float d, int baseColor, float xofs, float yofs) {
     if(label!=null) {
-      label.draw(dx,dy,f,up,baseColor,xofs,yofs);
+      label.draw(dx,dy,f,d,baseColor,xofs,yofs);
     }
   }
 }
@@ -193,7 +223,7 @@ class Text extends Element {
     //Text object as a Point label. Doesn't need bounding box constraint
     this(P.x,P.y,-1,-1,Lkolor,Lname,Lhorz,Lvert,Lofs);
   }
-  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, float d, int baseColor, float xofs, float yofs) {
     textSize(50);
     textAlign(horz,vert);
     if(f==0) {
@@ -233,22 +263,18 @@ class Segment extends Element {
     P1=LP1;
     kolor=Lkolor;
   }
-  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, float d, int baseColor, float xofs, float yofs) {
     //Line will draw from P0 at time t0 to P1 at time t1, will start fading out at t2, and will be completely faded out at t3
-    if(f==0) {
+    if(f==0 || d==0) { //<>// //<>//
       return; //Not time to draw yet
-    } else if (up) {
-      float x=linterp(0,P0.x,1,P1.x,f);
-      float y=linterp(0,P0.y,1,P1.y,f);
-      stroke(baseColor);
-      strokeWeight(5);
-      line(P0.x+dx,P0.y+dy,x+dx,y+dy);
-    } else {
-      float alpha=f*255;;
-      strokeWeight(5);
-      stroke(baseColor,alpha);
-      line(P0.x+dx,P0.y+dy,P1.x+dx,P1.y+dy);
-    } 
+    }
+    //print(String.format("draw(...,f=%f,d=%f,baseColor=0x%08x,...)\n",f,d,baseColor));
+    float alpha=f*255;
+    strokeWeight(5);
+    stroke(baseColor,alpha);
+    float x=linterp(0,P0.x,1,P1.x,d);
+    float y=linterp(0,P0.y,1,P1.y,d);
+    line(P0.x+dx,P0.y+dy,x+dx,y+dy);
   }
 }
 
@@ -256,7 +282,7 @@ class Line extends Segment {
   Line(Point LP0, Point LP1, int Lkolor) {
     super(LP0,LP1,Lkolor);
   }
-  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, float d, int baseColor, float xofs, float yofs) {
     //Line will fade in from P0 at time t0 to P1 at time t1, will start fading out at t2, and will be completely faded out at t3
     if(f==0) {
       return; //Not time to draw yet
@@ -283,7 +309,7 @@ class Angle extends Element {
     f1=0.1;
     f2=0.2;
   }
-  @Override protected void draw(float dx, float dy, float f, boolean up, int baseColor, float xofs, float yofs) {
+  @Override protected void draw(float dx, float dy, float f, float d, int baseColor, float xofs, float yofs) {
     if(f==0) {
       return;
     } 
